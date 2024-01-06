@@ -6,7 +6,6 @@ class ProductManager {
         this.products = [];
     }
     
-
     addProduct(title , description, price, img, code, stock) {
 
         if(!title || !description || !price || !img || !code || !stock){
@@ -38,7 +37,7 @@ class ProductManager {
     }
 
     getProductsById(id) {
-        const product = this.products.find(item => item.id === is);
+        const product = this.products.find(item => item.id === id);
 
         if(!product) {
             console.error("Not Found");
@@ -54,7 +53,7 @@ const manager = new ProductManager();
 
 console.log(manager.getProducts());
 
-manager.addProduct("producto prueba" , "esto es un pruducto a prueba", 100, "sin imagen", "abc123", 15);
+manager.addProduct("producto prueba" , "esto es un producto a prueba", 100, "sin imagen", "abc123", 15);
 
 manager.addProduct("yerba" , "yerba mate suave", 200, "sin imagen", "abc124", 10);
 
