@@ -1,22 +1,22 @@
-const fs = require ("fs").promises;
+const fs = require("fs").promises;
 
 class ProductManager {
 
     static ultId = 0;
 
-    constructor (path) {
+    constructor(path) {
         this.products = [];
         this.path = path;
     }
-    
-    async addProduct({title , description, price, img, code, stock}) {
 
-        if(!title || !description || !price || !img || !code || !stock){
-            console.log ("todos los campos son obligatorios");
+    async addProduct({ title, description, price, img, code, stock }) {
+
+        if (!title || !description || !price || !img || !code || !stock) {
+            console.log("todos los campos son obligatorios");
             return;
         }
 
-        if(this.products.some(item => item.code === code)){
+        if (this.products.some(item => item.code === code)) {
             console.log("el codigo debe ser unico");
             return;
         }
@@ -37,55 +37,93 @@ class ProductManager {
 
     }
 
-    async getProducts(){
+    async getProducts() {
         await this.leerArchivo();
     }
 
     getProductsById(id) {
         const product = this.products.find(item => item.id === id);
 
-        if(!product) {
+        if (!product) {
             console.error("Not Found");
         } else {
             console.log(product);
         }
     }
 
-    async leerArchivo () {
+    async leerArchivo() {
         try {
             const respuesta = await fs.readFile(this.path, "utf-8");
             const arrayProductos = JSON.parse(respuesta);
             return arrayProductos;
         } catch (error) {
             console.log("error al leer archivo", error)
-            
-        }    
+
+        }
     }
     async guardarArchivo(arrayProductos) {
         try {
             await fs.writeFile(this.path, JSON.stringify(arrayProductos, null, 2));
 
         } catch (error) {
-            console.log ("error al leer archivo", error);
-            
+            console.log("error al leer archivo", error);
+
         }
+    }
+    updateProduct(id, updatedFields) {
+        const index = this.products.findIndex(p => p.id === id);
+        if (index === -1) {
+            throw new Error('Producto no encontrado');
+        }
+
+        this.products[index] = { ...this.products[index], ...updatedFields };
+        return this.products[index];
+    }
+
+    deleteProduct(id) {
+        const index = this.products.findIndex(p => p.id === id);
+        if (index === -1) {
+            throw new Error('Producto no encontrado');
+        }
+
+        // Eliminar producto
+        const deletedProduct = this.products.splice(index, 1)[0];
+        return deletedProduct;
     }
 }
 
 //testing
 
-const manager = new ProductManager();
+// Pruebas
+const productManager = new ProductManager();
 
-console.log(manager.getProducts());
+// Prueba 1
+const productsEmpty = productManager.getProducts();
+console.log(productsEmpty); // []
 
-manager.addProduct("producto prueba" , "esto es un producto a prueba", 100, "sin imagen", "abc123", 15);
+// Prueba 2
+const addedProduct = productManager.addProduct({
+    title: 'producto prueba',
+    description: 'Este es un producto prueba',
+    price: 200,
+    thumbnail: 'Sin imagen',
+    code: 'abc123',
+    stock: 25
+});
+console.log(addedProduct);
 
-manager.addProduct("yerba" , "yerba mate suave", 200, "sin imagen", "abc124", 10);
+// Prueba 3
+const productsAfterAdd = productManager.getProducts();
+console.log(productsAfterAdd);
 
-manager.addProduct("azucar" , "la mas dulce", 300, "sin imagen", "abc125", 20);
+// Prueba 4
+const productById = productManager.getProductById(addedProduct.id);
+console.log(productById);
 
-console.log(manager.getProducts());
+// Prueba 5
+const updatedProduct = productManager.updateProduct(addedProduct.id, { price: 250 });
+console.log(updatedProduct);
 
-console.log("verificamos si hay azucar:");
-manager.getProductsById(30);
-
+// Prueba 6
+const deletedProduct = productManager.deleteProduct(addedProduct.id);
+console.log(deletedProduct);
