@@ -45,11 +45,11 @@ class ProductManager {
         await this.leerArchivo();
     }
 
-    getProductsById(id) {
+    getProductById(id) {
         const product = this.products.find(item => item.id === id);
 
         if (!product) {
-            console.error("Not Found");
+            console.error("producto no encontrado");
         } else {
             console.log(product);
         }
@@ -87,7 +87,7 @@ class ProductManager {
     deleteProduct(id) {
         const index = this.products.findIndex(p => p.id === id);
         if (index === -1) {
-            throw new Error('Producto no encontrado');
+            throw new Error('Producto no borrado correctamente');
         }
 
         // Eliminar producto
