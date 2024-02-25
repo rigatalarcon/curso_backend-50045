@@ -1,15 +1,12 @@
-
 <h1>Mis Productos</h1>
 
-
-<div id="contenedorProductos"></div>
-
-
-<div class="contenedorProductitos">
+<div class="contenedorProducts">
     {{#each productos}}
+    <div class="card">
         <p> {{this.title}} </p>
         <p> {{this.description}} </p>
         <p> {{this.price}} </p>
+    </div>
     {{/each}}
 
 </div>

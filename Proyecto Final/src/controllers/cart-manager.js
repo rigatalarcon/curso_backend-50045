@@ -4,7 +4,7 @@ const fs = require("fs").promises;
 
 class CartManager {
     constructor(path) {
-        this.carts = [];
+        this.cart = [];
         this.path = path;
         this.lastId = 0;
         
@@ -14,10 +14,10 @@ class CartManager {
     async cargarCarritos() {
         try {
             const data = await fs.readFile(this.path, "utf8")
-            this.carts = JSON.parse(data);
-            if (this.carts.length > 0) {
+            this.cart = JSON.parse(data);
+            if (this.cart.length > 0) {
 
-                this.lastId = Math.max(...this.carts.map(cart => cart.id));
+                this.lastId = Math.max(...this.cart.map(cart => cart.id));
 
             }
         } catch (error) {
@@ -28,7 +28,7 @@ class CartManager {
     }
 
     async guardarCarritos() {
-        await fs.writeFile(this.path, JSON.stringify(this.carts, null, 2));
+        await fs.writeFile(this.path, JSON.stringify(this.cart, null, 2));
     }
 
     async crearCarrito() {
@@ -37,14 +37,14 @@ class CartManager {
             products: []
         };
 
-        this.carts.push(nuevoCarrito);
+        this.cart.push(nuevoCarrito);
         await this.guardarCarritos();
         return nuevoCarrito;
     }
 
     async getCarritoById(cartId) {
         try {
-            const carrito = await this.carts.find(c => c.id === cartId);
+            const carrito = await this.cart.find(c => c.id === cartId);
 
             if (!carrito) {
                 throw new Error(`No existe un carrito con el id ${cartId}`)

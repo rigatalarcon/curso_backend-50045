@@ -22,6 +22,8 @@ const renderProductos = (productos) => {
                         `;
 
         contenedorProductos.appendChild(card);
+
+        
         //Agregamos el evento al boton de eliminar: 
         card.querySelector("button").addEventListener("click", ()=> {
             eliminarProducto(item.id);
