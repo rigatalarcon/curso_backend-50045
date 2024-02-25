@@ -5,6 +5,7 @@ const exphbs = require("express-handlebars");
 const socket = require("socket.io");
 const PUERTO = 8080;
 const mongoose = require("mongoose");
+require("./database.js");
 
 const productsRouter = require("./routes/products.router.js");
 const cartsRouter = require("./routes/carts.router.js");
@@ -26,40 +27,31 @@ app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/", viewsRouter);
 
-const ProductManager = require("../src/controllers/product-manager.js");
-const productManager = new ProductManager("./src/models/product.json");
+//const ProductManager = require("../src/controllers/product-manager.js");
+//const productManager = new ProductManager("./src/models/product.json");
 
 //Iniciamos el servidor
 const httpServer = app.listen(PUERTO, () => {
     console.log(`Escuchando en el puerto ${PUERTO} `);
 })
 
-//conecto a MongoDB
 
-//mongoose.connect("mongodb+srv://Coderhouse-50045:coderhouse@cluster0.u7fkdmd.mongodb.net/?retryWrites=true&w=majority")
-  //  .then(() => console.log("conectados a la BD"))
-    //.catch((error) => console.log(error))
+const MessageModel = require("./models/message.model.js");
+const io = new socket.Server(httpServer);
 
-//server Socket.io
+io.on("connection", (socket) => {
+    console.log("Nuevo usuario conectado");
 
-const io = socket(httpServer);
+    socket.on("message", async data => {
 
-io.on("connection", async (socket) => {
-    console.log("Un cliente conectado");
+        //Guardo el mensaje en MongoDB: 
+        await MessageModel.create(data);
 
-    socket.emit("productos", await productManager.getProducts());
+        //Obtengo los mensajes de MongoDB y se los paso al cliente: 
+        const messages = await MessageModel.find();
+        console.log(messages);
+        io.sockets.emit("message", messages);
 
-    socket.on("eliminarProducto", async (id) => {
-        await productManager.deleteProduct(id);
-        io.sockets.emit("productos", await productManager.getProducts());
-    })
-    
-    socket.on("agregarProducto", async (producto) => {
-        console.log(producto);
-        await productManager.addProduct(producto);
-        io.sockets.emit("productos", await productManager.getProducts());
     })
 })
-
-
 
