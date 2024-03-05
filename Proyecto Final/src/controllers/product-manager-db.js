@@ -67,7 +67,7 @@ class ProductManager {
             const updateProduct =  await ProductModel.findByIdAndUpdate(id, productoActualizado);
 
             if(!updateProduct) {
-                console.log("Producto no encontrado, vamos a morir");
+                console.log("Producto no encontrado");
                 return null; 
             }
             console.log("Producto actualizado");

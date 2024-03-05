@@ -4,37 +4,44 @@ const router = express.Router();
 const ProductManager = require("../controllers/product-manager-db.js")
 const productManager = new ProductManager();
 
+//1) Listar todos los productos. 
 router.get("/", async (req, res) => {
     try {
-        const productos = await productManager.getProducts();
         const limit = req.query.limit;
-        const limitnumber = limit? parseInt(limit) : undefined;
-        if(limitnumber && !isNaN(limitnumber)) {
+        const productos = await productManager.getProducts();
+        if (limit) {
             res.json(productos.slice(0, limit));
         } else {
             res.json(productos);
         }
     } catch (error) {
-        console.log("Error al obtener los productos", error);
-        res.status(500).json({ error: "Error del servidor" });
+        console.error("Error al obtener productos", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
     }
-})
+});
+//2)solo producto por ID:
+
 router.get("/:pid", async (req, res) => {
+    const id = req.params.pid;
+
     try {
-        const id = req.params.pid;
         const producto = await productManager.getProductById(id);
-        
         if (!producto) {
-            res.json({error: "Producto no encontrado"});
-        } else {
-            res.json(producto);
+            return res.json({
+                error: "Producto no encontrado"
+            });
         }
 
+        res.json(producto);
     } catch (error) {
-        console.log("Error al obtener el producto", error);
-        res.status(500).json({ error: "Error del servidor" });
+        console.error("Error al obtener producto", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
     }
-})
+});
 
 router.post("/", async (req, res) => {
     const nuevoProducto = req.body;
@@ -50,33 +57,60 @@ router.post("/", async (req, res) => {
     }
 })
 
+//3) Agregar nuevo producto: 
+
+router.post("/", async (req, res) => {
+    const nuevoProducto = req.body;
+
+    try {
+        await productManager.addProduct(nuevoProducto);
+        res.status(201).json({
+            message: "Producto agregado exitosamente"
+        });
+    } catch (error) {
+        console.error("Error al agregar producto", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
+    }
+});
+
+//4) Actualizar por ID
+
 router.put("/:pid", async (req, res) => {
-    let id = req.params.pid; 
-    const productoActualizado = req.body; 
+    const id = req.params.pid;
+    const productoActualizado = req.body;
 
     try {
         await productManager.updateProduct(id, productoActualizado);
-        res.json({message: "Producto actualizado correctamente"});
+        res.json({
+            message: "Producto actualizado exitosamente"
+        });
     } catch (error) {
-        console.log("No se pudo actualizar el producto ", error); 
-        res.status(500).json({error: "Error del server"});
+        console.error("Error al actualizar producto", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
     }
-} )
+});
 
-router.delete("/:id", async (req, res) => {
-    let id = req.params.pid;
-    const productoBorrado = req.body;
+//5) Eliminar producto: 
+
+router.delete("/:pid", async (req, res) => {
+    const id = req.params.pid;
 
     try {
-        await productManager.deleteProduct(id, productoBorrado);
-        res.json({message: "Producto eliminado correctamente", error})
-        
+        await productManager.deleteProduct(id);
+        res.json({
+            message: "Producto eliminado exitosamente"
+        });
     } catch (error) {
-        console.log("No se pudo borar el producto ", error); 
-        res.status(500).json({error: "Error del server"});
-        
+        console.error("Error al eliminar producto", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
     }
-})
+});
 
 
 module.exports = router; 

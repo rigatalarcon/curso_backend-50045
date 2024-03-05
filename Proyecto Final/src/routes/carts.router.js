@@ -4,48 +4,47 @@ const CartManager = require("../controllers/cart-manager-db.js");
 const cartManager = new CartManager();
 
 
+//1) Creamos un nuevo carrito: 
+
 router.post("/", async (req, res) => {
     try {
         const nuevoCarrito = await cartManager.crearCarrito();
-        res.status(201).json(nuevoCarrito({ message: "Carrito agregado exitosamente" }));
+        res.json(nuevoCarrito);
     } catch (error) {
-        console.log("error al agregar el carrito ", error);
-        res.status(500).json({ error: "error del servidor" });
+        console.error("Error al crear un nuevo carrito", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
-})
+});
+
+//2) Listamos los productos que pertenecen a determinado carrito. 
 
 router.get("/:cid", async (req, res) => {
     const cartId = req.params.cid;
 
     try {
-        const cart = await productManager.getCarritoById(cartId);
-        if (!cart) {
-            res.json({ error: "carrito no encontrado" });
-        } else {
-            res.json(cart);
-        }
-
+        const carrito = await cartManager.getCarritoById(cartId);
+        res.json(carrito.products);
     } catch (error) {
-        console.log("Error al obtener el carrito", error);
-        res.status(500).json({ error: "Error del servidor" });
+        console.error("Error al obtener el carrito", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
-})
+});
+
+
+//3) Agregar productos a distintos carritos.
 
 router.post("/:cid/product/:pid", async (req, res) => {
-
     const cartId = req.params.cid;
     const productId = req.params.pid;
-    const quantity = 1;
+    const quantity = req.body.quantity || 1;
 
     try {
-        const actualizarcart = await cartManager.addProductoACarrito(cartId, productId, quantity);
-        res.json(actualizarcart.products);
-
+        const actualizarCarrito = await cartManager.agregarProductoAlCarrito(cartId, productId, quantity);
+        res.json(actualizarCarrito.products);
     } catch (error) {
-        console.log("Error al agregar productos en el carrito", error);
-        res.status(500).json({ error: "Error del servidor" })
+        console.error("Error al agregar producto al carrito", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
-})
+});
 
-
-module.exports = router; 
+module.exports = router;
